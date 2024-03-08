@@ -1,21 +1,21 @@
 package refactorp2p.p2pclonecoding;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import java.io.*;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PeerHandler implements Runnable {
+public class PeerHandler extends Thread {
     private Socket socket;
     private Set<String> processedMessages; // 처리된 메시지를 저장하는 Set
     private boolean isSocketClosed;
 
+
     public PeerHandler(Socket socket) throws IOException {
         this.socket = socket;
-        this.isSocketClosed=false;
     }
 
     public void run() {
@@ -27,41 +27,28 @@ public class PeerHandler implements Runnable {
                         // 소켓이 닫혔음을 알림
                         isSocketClosed = true;
                         System.out.println("Connection closed by peer.");
+                        break;
                     } else {
-                        System.out.println(message);
+                        handleMessages(message);
+                        //System.out.println(message);
                     }
                 } catch (IOException e) {
 //                    System.out.println("1");
-                    System.out.println("채팅 종료");
-                    break;
+                    //System.out.println("채팅 종료");
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
-    public void handleMessages(Socket socket) {
+    public void handleMessages(String message) {
         try {
-            BufferedReader peerReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String message = "";
-            while (true) {
-                try {
-                    message = peerReader.readLine();
-                    if (message == null) {
-                        break;
-                    }
-                    System.out.println(message);
-                }
-                catch (IOException e) {
-//                    System.out.println("2");
-                    break;
-                }
+            JsonObject jsonObject = Json.createReader(new StringReader(message)).readObject();
+            if (jsonObject.containsKey("username")) {
+                System.out.println("[" + jsonObject.getString("username") + "]: " + jsonObject.getString("message"));
             }
-        } catch (IOException e) {
-//            System.out.println("3");
-            e.printStackTrace();
+        } catch (JsonException e) {
+            interrupt();
         }
     }
 
@@ -69,12 +56,9 @@ public class PeerHandler implements Runnable {
     {
         for (Socket socket : uniquePeers) {
             try {
-                if(!socket.isClosed()){
-                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-                    printWriter.println(message);
-                }
+                PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
+                printWriter.println(message);
             } catch (IOException e) {
-//                System.out.println("4");
                 e.printStackTrace();
             }
         }

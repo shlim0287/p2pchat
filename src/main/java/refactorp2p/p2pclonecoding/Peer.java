@@ -20,6 +20,7 @@ public class Peer {
             communicate(userInputHandler, setupValues[0], networkCommunication);
 
             userInputHandler.close();
+            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,6 +54,7 @@ public class Peer {
     }
 
     public static void communicate(UserInputHandler userInputHandler, String username, NetworkCommunication networkCommunication) throws IOException {
+
         System.out.println("> you can now communicate (e to exit, c to change)");
         boolean flag = true;
         while (flag) {

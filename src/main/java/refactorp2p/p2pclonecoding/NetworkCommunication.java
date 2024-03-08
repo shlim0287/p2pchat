@@ -29,7 +29,7 @@ public class NetworkCommunication extends Thread {
                         peerHandler = new PeerHandler(socket);
                         connectedPeers.add(socket);
                         // 기존 스레드에서 메시지를 처리하도록 함
-                        peerHandler.handleMessages(socket);
+                        //peerHandler.handleMessages(socket);
                     } catch (SocketException se) {
                         // n번째 피어에서 발생하는 소켓에러 처리
                         System.out.println("피어가 연결을 닫았습니다.");
